@@ -47,15 +47,15 @@ export const NoiseChart: React.FC<NoiseChartProps> = ({ noiseData, t }) => {
               formatter={(value: any, name: string) => [
                 `${value} dB`,
                 name === 'noise' ? 'Noise Level' : name
-              ]}
-            />
-            <Line 
+              ]}            />            <Line 
               type="monotone" 
               dataKey="noise" 
               stroke="#3B82F6" 
-              strokeWidth={2}
-              dot={{ fill: '#3B82F6', strokeWidth: 2, r: 2 }}
-              activeDot={{ r: 4, stroke: '#3B82F6', strokeWidth: 2 }}
+              strokeWidth={2.5}
+              dot={false} // Hide dots for smoother line
+              activeDot={{ r: 5, stroke: '#3B82F6', strokeWidth: 2, fill: '#1E293B' }}
+              isAnimationActive={false}
+              connectNulls={true}
             />
           </LineChart>
         </ResponsiveContainer>

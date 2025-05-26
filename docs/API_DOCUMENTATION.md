@@ -1,4 +1,3 @@
-
 # API Documentation - Future Integration Guide
 
 ## Overview
@@ -16,8 +15,14 @@ export const currentEVData: { montreal, quebec, canada }
 
 ### Noise Data Generation
 ```typescript
-// Real-time noise simulation
+// Real-time noise simulation with continuous time series
 export const generateNoiseData = (evAdoptionRate: number): NoiseDataPoint[]
+
+// Unified data adapter with sliding window
+// src/data/unifiedDataAdapter.ts
+export const generateUnifiedNoiseData = (pointCount: number = 20): NoiseDataPoint[]
+export const addNewDataPoint = (): NoiseDataPoint[]
+export const resetTimeSeries = (): void
 ```
 
 ## Planned API Endpoints
@@ -200,5 +205,79 @@ Authorization: Bearer {api_key}
 X-Client-Version: 1.0.0
 X-Request-ID: {unique_request_id}
 ```
+
+## Real-Time Sensor Integration
+
+The application has been designed for seamless transition from simulated to real sensor data with the unified data adapter.
+
+### Integration Points
+
+1. **Real-Time Noise Sensor API** - Replace `generateRealisticNoise` with actual sensor readings:
+
+```typescript
+// Current implementation (simulated)
+const generateRealisticNoise = (timestamp: Date, baseNoise: number): number => {
+  // Multi-factor noise generation logic
+};
+
+// Future implementation with real sensors
+const generateRealisticNoise = async (timestamp: Date): Promise<number> => {
+  try {
+    // Get real-time reading from sensor API
+    const sensorResponse = await fetch(SENSOR_API_URL);
+    const sensorData = await sensorResponse.json();
+    return sensorData.papineau.currentNoise;
+  } catch (error) {
+    // Fallback to simulation on API failure
+    console.error('Sensor API error:', error);
+    return generateSimulatedNoise(timestamp);
+  }
+};
+```
+
+2. **Sliding Window Persistence** - Keep the sliding window approach for UI consistency:
+
+```typescript
+export const addNewDataPoint = async (): Promise<NoiseDataPoint[]> => {
+  const now = new Date();
+  
+  // Only add new point every 3 seconds
+  if (now.getTime() - lastUpdateTime < 3000) {
+    return globalTimeSeriesData;
+  }
+  
+  // Get real noise reading from sensor
+  const noiseLevel = await getSensorReading('papineau');
+  
+  // Create new data point
+  const newPoint = {
+    time: now.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' }),
+    noise: Math.round(noiseLevel * 10) / 10,
+    evImpact: calculateEVImpact(noiseLevel),
+    location: 'papineau_cartier',
+    isReal: true
+  };
+  
+  // Add to sliding window
+  globalTimeSeriesData.push(newPoint);
+  if (globalTimeSeriesData.length > 20) {
+    globalTimeSeriesData.shift();
+  }
+  
+  lastUpdateTime = now.getTime();
+  return [...globalTimeSeriesData];
+};
+```
+
+### Data Resilience Strategy
+
+The unified data adapter ensures resilience through:
+
+1. **Data Source Independence** - The UI components are agnostic to the data source
+2. **Graceful Degradation** - Fall back to simulation if sensor API fails
+3. **Consistent Visualization** - Maintain the same chart rendering approach
+4. **Persistent Time Series** - Continue using the sliding window mechanism
+
+This approach ensures a smooth transition from simulated to real sensor data without UI disruptions.
 
 This API documentation provides a roadmap for transitioning from the current simulated data to real sensor data while maintaining the existing user experience.

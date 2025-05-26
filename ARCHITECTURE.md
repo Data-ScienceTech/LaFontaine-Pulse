@@ -14,11 +14,13 @@ The Lafontaine Park Noise Monitor is a client-side React application that provid
 
 ### Data Flow
 ```
-evData.ts → Index.tsx → UI Components → User Interface
+noise_ev_data.ts → unifiedDataAdapter.ts → evData.ts → Index.tsx → UI Components
     ↓
-Real-time updates every 3 seconds
+Persistent time series with sliding window approach
     ↓
-Chart animations and state updates
+Real-time updates every 3 seconds with continuous data
+    ↓
+Chart rendering with realistic variations
 ```
 
 ### State Management
@@ -28,7 +30,23 @@ Chart animations and state updates
 
 ## Key Technical Components
 
-### 1. Data Layer (`src/data/evData.ts`)
+### 1. Data Foundation (`src/data/noise_ev_data.ts`)
+```typescript
+// Real DRSP/SAAQ data (June 2023 - May 2025)
+noiseSeries: Historical monthly noise measurements (LAeq24)
+evSeries: Historical monthly EV registrations
+```
+
+### 2. Unified Data Adapter (`src/data/unifiedDataAdapter.ts`)
+```typescript
+// Connects real data with UI visualization
+generateRealisticNoise(): Multi-factor noise pattern generation
+initializeTimeSeries(): Creates initial time series with variations
+addNewDataPoint(): Sliding window approach for continuous updates
+getDataStrategy(): Determines data source (REAL vs ESTIMATED)
+```
+
+### 3. Data Interface Layer (`src/data/evData.ts`)
 ```typescript
 // Core data structures
 EVAdoptionDataPoint: Historical EV adoption data

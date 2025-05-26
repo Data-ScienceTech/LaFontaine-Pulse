@@ -1,7 +1,7 @@
 
-// EV Adoption Data for Montreal/Quebec/Canada
-// This structure mimics what you'd get from a pandas dataframe
-// Replace this with real API calls or database queries later
+// EV Adoption Data Integration Layer
+// Now using unified data strategy that seamlessly combines real and estimated data
+// Single continuous curve without discontinuities
 
 export interface EVAdoptionDataPoint {
   year: number;
@@ -16,95 +16,67 @@ export interface NoiseDataPoint {
   noise: number;
   evImpact: number;
   location: 'papineau_cartier';
+  isReal?: boolean; // For debugging/transparency
 }
 
-// Historical and projected EV adoption rates (percentages)
-export const evAdoptionTimeSeries: EVAdoptionDataPoint[] = [
-  { year: 2020, montreal: 3.2, quebec: 4.1, canada: 3.5, noiseReduction: 0.8 },
-  { year: 2021, montreal: 4.8, quebec: 6.2, canada: 5.2, noiseReduction: 1.2 },
-  { year: 2022, montreal: 6.5, quebec: 8.7, canada: 6.8, noiseReduction: 1.8 },
-  { year: 2023, montreal: 7.9, quebec: 11.2, canada: 8.4, noiseReduction: 2.4 },
-  { year: 2024, montreal: 8.2, quebec: 12.4, canada: 9.1, noiseReduction: 2.8 },
-  { year: 2025, montreal: 12.5, quebec: 16.8, canada: 13.2, noiseReduction: 4.2 },
-  { year: 2026, montreal: 17.2, quebec: 22.1, canada: 18.5, noiseReduction: 5.8 },
-  { year: 2027, montreal: 22.8, quebec: 27.9, canada: 23.7, noiseReduction: 7.6 },
-  { year: 2028, montreal: 28.1, quebec: 33.2, canada: 27.9, noiseReduction: 9.2 },
-  { year: 2029, montreal: 32.6, quebec: 37.8, canada: 29.8, noiseReduction: 10.8 },
-  { year: 2030, montreal: 35.0, quebec: 40.0, canada: 30.0, noiseReduction: 12.0 }
-];
+// Import unified data adapter for seamless real/estimated data
+import { 
+  generateUnifiedNoiseData,
+  getCurrentUnifiedEVAdoption,
+  calculateUnifiedNoiseReduction,
+  getUnifiedDataSummary,
+  getLatestRealBaseline
+} from './unifiedDataAdapter';
 
-// Current data (what would come from real-time APIs)
+// Keep legacy imports for backwards compatibility
+import { 
+  convertToEVAdoptionData, 
+  currentRealEVData,
+  getRealCorrelationData
+} from './realDataAdapter';
+
+// Historical and projected EV adoption rates (using real data)
+export const evAdoptionTimeSeries: EVAdoptionDataPoint[] = convertToEVAdoptionData();
+
+// Current data using unified approach
+const latestBaseline = getLatestRealBaseline();
 export const currentEVData = {
   montreal: { 
-    current: 8.2, 
+    current: getCurrentUnifiedEVAdoption(), 
     target2030: 35,
-    monthlyGrowth: 0.3,
-    noiseImpactPercentage: 8 // max dB reduction at 100% adoption
+    monthlyGrowth: 3, // Based on real data trend
+    noiseImpactPercentage: currentRealEVData.montreal.noiseImpactPercentage
   },
   quebec: { 
-    current: 12.4, 
+    current: getCurrentUnifiedEVAdoption() * 1.2, 
     target2030: 40,
-    monthlyGrowth: 0.4,
-    noiseImpactPercentage: 8
+    monthlyGrowth: 3,
+    noiseImpactPercentage: currentRealEVData.quebec.noiseImpactPercentage
   },
   canada: { 
-    current: 9.1, 
+    current: getCurrentUnifiedEVAdoption() * 0.8, 
     target2030: 30,
-    monthlyGrowth: 0.25,
-    noiseImpactPercentage: 8
+    monthlyGrowth: 2.4,
+    noiseImpactPercentage: currentRealEVData.canada.noiseImpactPercentage
   }
 };
 
-// Rush hour patterns with EV impact calculations
-export const generateNoiseData = (evAdoptionRate: number): NoiseDataPoint[] => {
-  const data: NoiseDataPoint[] = [];
-  const now = new Date();
-  
-  // Generate last 20 data points (1 hour of 3-minute intervals)
-  for (let i = 19; i >= 0; i--) {
-    const timestamp = new Date(now.getTime() - (i * 3 * 60 * 1000));
-    const hour = timestamp.getHours();
-    const minute = timestamp.getMinutes();
-    
-    // Base noise levels by time of day
-    let baseNoise = 40;
-    if ((hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19)) {
-      baseNoise = 58; // Rush hour
-    } else if (hour >= 6 && hour <= 22) {
-      baseNoise = 47; // Regular daytime
-    } else {
-      baseNoise = 35; // Nighttime
-    }
-    
-    // Calculate EV impact on noise reduction
-    const maxNoiseReduction = currentEVData.montreal.noiseImpactPercentage;
-    const evImpactReduction = (evAdoptionRate / 100) * maxNoiseReduction;
-    
-    // Add some realistic variation
-    const variation = Math.sin((hour * 60 + minute) / 60) * 3 + Math.random() * 4 - 2;
-    const finalNoise = Math.max(30, Math.min(75, baseNoise - evImpactReduction + variation));
-    
-    data.push({
-      time: timestamp.toLocaleTimeString(),
-      noise: Math.round(finalNoise * 10) / 10,
-      evImpact: Math.round(evImpactReduction * 10) / 10,
-      location: 'papineau_cartier'
-    });
-  }
-  
-  return data;
+// Export unified data utilities
+export const dataSummary = getUnifiedDataSummary();
+export const correlationData = getRealCorrelationData();
+
+// Generate unified noise data - single continuous curve from real data to estimated
+export const generateNoiseData = (evAdoptionRate?: number): NoiseDataPoint[] => {
+  // Use unified data generator that smoothly transitions from real to estimated
+  return generateUnifiedNoiseData(20); // Last 20 data points (1 hour)
 };
 
-// Function to get current EV adoption with realistic fluctuation
+// Function to get current EV adoption with unified approach
 export const getCurrentEVAdoption = (): number => {
-  const baseRate = currentEVData.montreal.current;
-  const monthlyGrowth = currentEVData.montreal.monthlyGrowth;
-  const dailyVariation = Math.sin(Date.now() / (24 * 60 * 60 * 1000)) * 0.1;
-  
-  return baseRate + dailyVariation;
+  return getCurrentUnifiedEVAdoption();
 };
 
-// Function to calculate noise reduction impact from EV adoption
+// Function to calculate noise reduction impact using unified approach
 export const calculateNoiseReduction = (evRate: number): number => {
-  return (evRate / 100) * currentEVData.montreal.noiseImpactPercentage;
+  return calculateUnifiedNoiseReduction(evRate);
 };
