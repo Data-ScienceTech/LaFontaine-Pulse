@@ -39,7 +39,9 @@ const translations = {
     rushHourDesc: "Peak traffic from South Shore commuters",
     peakHours: "Peak: 7-9 AM, 4-7 PM",
     aboutSensor: "About Our Monitoring",
-    sensorDesc: "High-sensitivity audio sensor and AI model positioned at Les Dauphins sur Le Parc, providing precise noise measurements at this busy Plateau intersection."
+    sensorDesc: "High-sensitivity audio sensor and AI model positioned at Les Dauphins sur Le Parc, providing precise noise measurements at this busy Plateau intersection.",
+    poweredBy: "Powered by",
+    contact: "Contact us at"
   },
   fr: {
     title: "Moniteur de Bruit Parc Lafontaine",
@@ -71,8 +73,17 @@ const translations = {
     rushHourDesc: "Circulation de pointe des banlieusards de la Rive-Sud",
     peakHours: "Pointe: 7-9h, 16-19h",
     aboutSensor: "À Propos de Notre Surveillance",
-    sensorDesc: "Capteur audio haute sensibilité et modèle IA positionnés aux Dauphins sur Le Parc, fournissant des mesures précises du bruit à cette intersection achalandée du Plateau."
+    sensorDesc: "Capteur audio haute sensibilité et modèle IA positionnés aux Dauphins sur Le Parc, fournissant des mesures précises du bruit à cette intersection achalandée du Plateau.",
+    poweredBy: "Propulsé par",
+    contact: "Contactez-nous à"
   }
+};
+
+// EV adoption data for Montreal/Quebec/Canada (realistic estimates)
+const evAdoptionData = {
+  montreal: { current: 8.2, target2030: 35 },
+  quebec: { current: 12.4, target2030: 40 },
+  canada: { current: 9.1, target2030: 30 }
 };
 
 const Index = () => {
@@ -80,13 +91,13 @@ const Index = () => {
   const [showConsent, setShowConsent] = useState(true);
   const [consentGiven, setConsentGiven] = useState(false);
   const [currentNoise, setCurrentNoise] = useState(45);
-  const [evAdoption, setEvAdoption] = useState(23);
+  const [evAdoption, setEvAdoption] = useState(evAdoptionData.montreal.current);
   const [lastUpdate, setLastUpdate] = useState(0);
   const [noiseData, setNoiseData] = useState<Array<{time: string, noise: number}>>([]);
 
   const t = translations[language];
 
-  // Simulate live data updates
+  // Simulate live data updates with EV adoption correlation
   useEffect(() => {
     if (!consentGiven) return;
 
@@ -95,19 +106,27 @@ const Index = () => {
       const time = now.toLocaleTimeString();
       const hour = now.getHours();
       
-      // Simulate rush hour patterns (higher noise during peak times)
+      // Simulate rush hour patterns with EV adoption impact
       let baseNoise = 40;
+      const evImpactReduction = (evAdoption / 100) * 8; // EVs reduce noise by up to 8dB
+      
       if ((hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19)) {
-        baseNoise = 55; // Rush hour
+        baseNoise = 58 - evImpactReduction; // Rush hour with EV impact
       } else if (hour >= 6 && hour <= 22) {
-        baseNoise = 45; // Regular daytime
+        baseNoise = 47 - evImpactReduction; // Regular daytime with EV impact
+      } else {
+        baseNoise = 35 - (evImpactReduction * 0.5); // Nighttime
       }
       
-      const variation = Math.random() * 15 - 7.5;
+      const variation = Math.random() * 12 - 6;
       const newNoise = Math.max(30, Math.min(75, baseNoise + variation));
       
       setCurrentNoise(Math.round(newNoise));
-      setEvAdoption(23 + Math.sin(Date.now() / 50000) * 7);
+      
+      // Simulate gradual EV adoption increase
+      const adoptionVariation = Math.sin(Date.now() / 60000) * 0.3;
+      setEvAdoption(evAdoptionData.montreal.current + adoptionVariation);
+      
       setLastUpdate(0);
       
       setNoiseData(prev => {
@@ -124,7 +143,7 @@ const Index = () => {
       clearInterval(interval);
       clearInterval(updateCounter);
     };
-  }, [consentGiven]);
+  }, [consentGiven, evAdoption]);
 
   const handleConsent = (accepted: boolean) => {
     if (accepted) {
@@ -222,7 +241,7 @@ const Index = () => {
         {/* Main Content Grid */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
           {/* Current Noise Level */}
-          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center gap-2 text-lg">
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
@@ -234,11 +253,11 @@ const Index = () => {
                 <div className={`text-4xl font-bold mb-1 ${getNoiseColor(currentNoise)}`}>
                   {currentNoise}
                 </div>
-                <div className="text-lg text-slate-400 mb-2">{t.decibels}</div>
-                <Badge variant="secondary" className="bg-slate-700 text-slate-300 mb-2">
+                <div className="text-lg text-slate-300 mb-2">{t.decibels}</div>
+                <Badge variant="secondary" className="bg-slate-700 text-slate-200 mb-2">
                   {getNoiseDescription(currentNoise)}
                 </Badge>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-slate-400">
                   {t.lastUpdate}: {lastUpdate}s
                 </div>
               </div>
@@ -246,35 +265,36 @@ const Index = () => {
           </Card>
 
           {/* Chart */}
-          <Card className="lg:col-span-2 bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <Card className="lg:col-span-2 bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white text-lg">{t.noiseChart}</CardTitle>
-              <CardDescription className="text-slate-400 text-sm">
+              <CardDescription className="text-slate-300 text-sm">
                 {t.location}
               </CardDescription>
             </CardHeader>
             <CardContent className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={noiseData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
                   <XAxis 
                     dataKey="time" 
-                    stroke="#9CA3AF"
+                    stroke="#94A3B8"
                     fontSize={10}
                     tickFormatter={(value) => value.split(':').slice(0, 2).join(':')}
                   />
                   <YAxis 
-                    stroke="#9CA3AF"
+                    stroke="#94A3B8"
                     fontSize={10}
                     domain={[30, 75]}
                   />
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
-                      borderRadius: '6px'
+                      backgroundColor: '#1E293B',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      color: '#F1F5F9'
                     }}
-                    labelStyle={{ color: '#F3F4F6' }}
+                    labelStyle={{ color: '#F1F5F9' }}
                   />
                   <Line 
                     type="monotone" 
@@ -290,7 +310,7 @@ const Index = () => {
           </Card>
 
           {/* EV Adoption Rate */}
-          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center gap-2 text-lg">
                 <Car className="text-green-400" size={20} />
@@ -300,23 +320,26 @@ const Index = () => {
             <CardContent>
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">
-                  {Math.round(evAdoption)}%
+                  {Math.round(evAdoption * 10) / 10}%
                 </div>
                 <div className="w-full bg-slate-700 rounded-full h-2 mb-3">
                   <div 
                     className="bg-gradient-to-r from-green-500 to-green-400 h-2 rounded-full transition-all duration-1000"
-                    style={{ width: `${evAdoption}%` }}
+                    style={{ width: `${Math.min(evAdoption * 2.5, 100)}%` }}
                   ></div>
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-300 mb-1">
                   Plateau Montréal
+                </p>
+                <p className="text-xs text-slate-400">
+                  Target 2030: {evAdoptionData.montreal.target2030}%
                 </p>
               </div>
             </CardContent>
           </Card>
 
           {/* Noise Guide */}
-          <Card className="bg-gradient-to-br from-green-900/30 to-green-800/30 border-green-700/50 backdrop-blur-sm">
+          <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center gap-2 text-lg">
                 <Leaf className="text-green-400" size={20} />
@@ -325,26 +348,26 @@ const Index = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-green-400">30-40 dB</span>
-                <span className="text-slate-300">{t.quiet}</span>
+                <span className="text-green-400 font-medium">30-40 dB</span>
+                <span className="text-slate-200">{t.quiet}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-yellow-400">40-50 dB</span>
-                <span className="text-slate-300">{t.moderate}</span>
+                <span className="text-yellow-400 font-medium">40-50 dB</span>
+                <span className="text-slate-200">{t.moderate}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-orange-400">50-60 dB</span>
-                <span className="text-slate-300">{t.loud}</span>
+                <span className="text-orange-400 font-medium">50-60 dB</span>
+                <span className="text-slate-200">{t.loud}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-red-400">60+ dB</span>
-                <span className="text-slate-300">{t.veryLoud}</span>
+                <span className="text-red-400 font-medium">60+ dB</span>
+                <span className="text-slate-200">{t.veryLoud}</span>
               </div>
             </CardContent>
           </Card>
 
           {/* Sensor Location */}
-          <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/30 border-blue-700/50 backdrop-blur-sm">
+          <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center gap-2 text-lg">
                 <Building2 className="text-blue-400" size={20} />
@@ -355,9 +378,9 @@ const Index = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="text-blue-400" size={16} />
-                  <span className="text-slate-300">{t.dauphinsTower}</span>
+                  <span className="text-slate-200">{t.dauphinsTower}</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-300 leading-relaxed">
                   {t.sensorDesc}
                 </p>
               </div>
@@ -365,7 +388,7 @@ const Index = () => {
           </Card>
 
           {/* Rush Hour Info */}
-          <Card className="lg:col-span-2 bg-gradient-to-br from-orange-900/30 to-orange-800/30 border-orange-700/50 backdrop-blur-sm">
+          <Card className="lg:col-span-2 bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center gap-2 text-lg">
                 <Clock className="text-orange-400" size={20} />
@@ -375,18 +398,43 @@ const Index = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-slate-300 text-sm leading-relaxed">
+                  <p className="text-slate-200 text-sm leading-relaxed">
                     {t.rushHourDesc}
                   </p>
                 </div>
                 <div className="text-center">
-                  <Badge variant="secondary" className="bg-orange-700/50 text-orange-200">
+                  <Badge variant="secondary" className="bg-orange-700/50 text-orange-200 border-orange-600">
                     {t.peakHours}
                   </Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-4 pt-4 border-t border-slate-700">
+          <div className="text-center text-sm text-slate-400">
+            <p>
+              {t.poweredBy}{" "}
+              <a 
+                href="https://datasciencetech.ca" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                datasciencetech.ca
+              </a>
+              {" "}&middot;{" "}
+              {t.contact}{" "}
+              <a 
+                href="mailto:info@datasciencetech.ca" 
+                className="text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                info@datasciencetech.ca
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
