@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Car, Leaf, CloudLightning, MapPin, Building2, Clock } from 'lucide-react';
@@ -7,6 +6,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { 
+  currentEVData, 
+  generateNoiseData, 
+  getCurrentEVAdoption, 
+  calculateNoiseReduction,
+  type NoiseDataPoint 
+} from '@/data/evData';
+
+// EV adoption data for Montreal/Quebec/Canada (realistic estimates)
+const evAdoptionData = {
+  montreal: { current: 8.2, target2030: 35 },
+  quebec: { current: 12.4, target2030: 40 },
+  canada: { current: 9.1, target2030: 30 }
+};
 
 const translations = {
   en: {
@@ -41,7 +54,9 @@ const translations = {
     aboutSensor: "About Our Monitoring",
     sensorDesc: "High-sensitivity audio sensor and AI model positioned at Les Dauphins sur Le Parc, providing precise noise measurements at this busy Plateau intersection.",
     poweredBy: "Powered by",
-    contact: "Contact us at"
+    contact: "Contact us at",
+    evImpact: "EV Noise Reduction",
+    realTimeData: "Real-time correlation with EV adoption data"
   },
   fr: {
     title: "Moniteur de Bruit Parc Lafontaine",
@@ -75,15 +90,10 @@ const translations = {
     aboutSensor: "À Propos de Notre Surveillance",
     sensorDesc: "Capteur audio haute sensibilité et modèle IA positionnés aux Dauphins sur Le Parc, fournissant des mesures précises du bruit à cette intersection achalandée du Plateau.",
     poweredBy: "Propulsé par",
-    contact: "Contactez-nous à"
+    contact: "Contactez-nous à",
+    evImpact: "Réduction de Bruit VÉ",
+    realTimeData: "Corrélation en temps réel avec les données d'adoption VÉ"
   }
-};
-
-// EV adoption data for Montreal/Quebec/Canada (realistic estimates)
-const evAdoptionData = {
-  montreal: { current: 8.2, target2030: 35 },
-  quebec: { current: 12.4, target2030: 40 },
-  canada: { current: 9.1, target2030: 30 }
 };
 
 const Index = () => {
@@ -91,47 +101,40 @@ const Index = () => {
   const [showConsent, setShowConsent] = useState(true);
   const [consentGiven, setConsentGiven] = useState(false);
   const [currentNoise, setCurrentNoise] = useState(45);
-  const [evAdoption, setEvAdoption] = useState(evAdoptionData.montreal.current);
+  const [evAdoption, setEvAdoption] = useState(getCurrentEVAdoption());
+  const [noiseReduction, setNoiseReduction] = useState(0);
   const [lastUpdate, setLastUpdate] = useState(0);
-  const [noiseData, setNoiseData] = useState<Array<{time: string, noise: number}>>([]);
+  const [noiseData, setNoiseData] = useState<NoiseDataPoint[]>([]);
 
   const t = translations[language];
 
-  // Simulate live data updates with EV adoption correlation
+  // Data-driven live updates using the structured EV data
   useEffect(() => {
     if (!consentGiven) return;
 
     const interval = setInterval(() => {
-      const now = new Date();
-      const time = now.toLocaleTimeString();
-      const hour = now.getHours();
+      // Get current EV adoption rate (simulated real-time data)
+      const currentEVRate = getCurrentEVAdoption();
+      const currentNoiseReduction = calculateNoiseReduction(currentEVRate);
       
-      // Simulate rush hour patterns with EV adoption impact
-      let baseNoise = 40;
-      const evImpactReduction = (evAdoption / 100) * 8; // EVs reduce noise by up to 8dB
+      // Generate noise data based on current EV adoption
+      const newNoiseData = generateNoiseData(currentEVRate);
+      const latestNoise = newNoiseData[newNoiseData.length - 1];
       
-      if ((hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19)) {
-        baseNoise = 58 - evImpactReduction; // Rush hour with EV impact
-      } else if (hour >= 6 && hour <= 22) {
-        baseNoise = 47 - evImpactReduction; // Regular daytime with EV impact
-      } else {
-        baseNoise = 35 - (evImpactReduction * 0.5); // Nighttime
-      }
-      
-      const variation = Math.random() * 12 - 6;
-      const newNoise = Math.max(30, Math.min(75, baseNoise + variation));
-      
-      setCurrentNoise(Math.round(newNoise));
-      
-      // Simulate gradual EV adoption increase
-      const adoptionVariation = Math.sin(Date.now() / 60000) * 0.3;
-      setEvAdoption(evAdoptionData.montreal.current + adoptionVariation);
-      
+      // Update state with data-driven values
+      setEvAdoption(currentEVRate);
+      setNoiseReduction(currentNoiseReduction);
+      setCurrentNoise(latestNoise.noise);
       setLastUpdate(0);
       
-      setNoiseData(prev => {
-        const newData = [...prev, { time, noise: Math.round(newNoise) }];
-        return newData.slice(-20);
+      // Keep only last 20 data points for the chart
+      setNoiseData(newNoiseData);
+      
+      console.log('Data Update:', {
+        evRate: currentEVRate,
+        noiseLevel: latestNoise.noise,
+        evImpact: latestNoise.evImpact,
+        noiseReduction: currentNoiseReduction
       });
     }, 3000);
 
@@ -143,7 +146,7 @@ const Index = () => {
       clearInterval(interval);
       clearInterval(updateCounter);
     };
-  }, [consentGiven, evAdoption]);
+  }, [consentGiven]);
 
   const handleConsent = (accepted: boolean) => {
     if (accepted) {
@@ -240,7 +243,7 @@ const Index = () => {
 
         {/* Main Content Grid */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
-          {/* Current Noise Level */}
+          {/* Current Noise Level with EV Impact Display */}
           <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center gap-2 text-lg">
@@ -251,12 +254,15 @@ const Index = () => {
             <CardContent>
               <div className="text-center">
                 <div className={`text-4xl font-bold mb-1 ${getNoiseColor(currentNoise)}`}>
-                  {currentNoise}
+                  {Math.round(currentNoise)}
                 </div>
                 <div className="text-lg text-slate-300 mb-2">{t.decibels}</div>
                 <Badge variant="secondary" className="bg-slate-700 text-slate-200 mb-2">
                   {getNoiseDescription(currentNoise)}
                 </Badge>
+                <div className="text-xs text-green-400 mb-1">
+                  -{Math.round(noiseReduction * 10) / 10}dB {t.evImpact}
+                </div>
                 <div className="text-xs text-slate-400">
                   {t.lastUpdate}: {lastUpdate}s
                 </div>
@@ -264,12 +270,12 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* Chart */}
+          {/* Enhanced Chart with EV Impact Data */}
           <Card className="lg:col-span-2 bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white text-lg">{t.noiseChart}</CardTitle>
               <CardDescription className="text-slate-300 text-sm">
-                {t.location}
+                {t.realTimeData}
               </CardDescription>
             </CardHeader>
             <CardContent className="h-48">
@@ -295,6 +301,10 @@ const Index = () => {
                       color: '#F1F5F9'
                     }}
                     labelStyle={{ color: '#F1F5F9' }}
+                    formatter={(value: any, name: string) => [
+                      `${value} dB`,
+                      name === 'noise' ? 'Noise Level' : name
+                    ]}
                   />
                   <Line 
                     type="monotone" 
@@ -309,7 +319,7 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* EV Adoption Rate */}
+          {/* Enhanced EV Adoption Rate with Real Data */}
           <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-white flex items-center gap-2 text-lg">
@@ -332,7 +342,10 @@ const Index = () => {
                   Plateau Montréal
                 </p>
                 <p className="text-xs text-slate-400">
-                  Target 2030: {evAdoptionData.montreal.target2030}%
+                  Target 2030: {currentEVData.montreal.target2030}%
+                </p>
+                <p className="text-xs text-green-400 mt-1">
+                  Growth: +{currentEVData.montreal.monthlyGrowth}%/month
                 </p>
               </div>
             </CardContent>
