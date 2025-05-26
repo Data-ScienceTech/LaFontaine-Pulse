@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Car, Leaf, CloudLightning, MapPin, Building2, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CloudLightning, MapPin, Building2, Clock, Leaf } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   currentEVData, 
@@ -13,6 +10,10 @@ import {
   calculateNoiseReduction,
   type NoiseDataPoint 
 } from '@/data/evData';
+import { NoiseDisplay } from '@/components/NoiseDisplay';
+import { NoiseChart } from '@/components/NoiseChart';
+import { EVAdoptionDisplay } from '@/components/EVAdoptionDisplay';
+import { ConsentDialog } from '@/components/ConsentDialog';
 
 // EV adoption data for Montreal/Quebec/Canada (realistic estimates)
 const evAdoptionData = {
@@ -174,43 +175,7 @@ const Index = () => {
   };
 
   if (!consentGiven) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-        <Dialog open={showConsent} onOpenChange={() => {}}>
-          <DialogContent className="max-w-2xl bg-slate-800 border-slate-700">
-            <DialogHeader>
-              <DialogTitle className="text-xl text-white flex items-center gap-2">
-                <Leaf className="text-green-400" />
-                {t.consentTitle}
-              </DialogTitle>
-              <DialogDescription className="text-slate-300 leading-relaxed">
-                {t.consentDescription}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <p className="text-sm text-slate-400 leading-relaxed">
-                {t.consentText}
-              </p>
-            </div>
-            <DialogFooter className="gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => handleConsent(false)}
-                className="border-slate-600 text-slate-300 hover:bg-slate-700"
-              >
-                {t.decline}
-              </Button>
-              <Button 
-                onClick={() => handleConsent(true)}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                {t.accept}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    );
+    return <ConsentDialog showConsent={showConsent} onConsent={handleConsent} t={t} />;
   }
 
   return (
@@ -243,113 +208,16 @@ const Index = () => {
 
         {/* Main Content Grid */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
-          {/* Current Noise Level with EV Impact Display */}
-          <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                {t.currentLevel}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center">
-                <div className={`text-4xl font-bold mb-1 ${getNoiseColor(currentNoise)}`}>
-                  {Math.round(currentNoise)}
-                </div>
-                <div className="text-lg text-slate-300 mb-2">{t.decibels}</div>
-                <Badge variant="secondary" className="bg-slate-700 text-slate-200 mb-2">
-                  {getNoiseDescription(currentNoise)}
-                </Badge>
-                <div className="text-xs text-green-400 mb-1">
-                  -{Math.round(noiseReduction * 10) / 10}dB {t.evImpact}
-                </div>
-                <div className="text-xs text-slate-400">
-                  {t.lastUpdate}: {lastUpdate}s
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <NoiseDisplay 
+            currentNoise={currentNoise}
+            noiseReduction={noiseReduction}
+            lastUpdate={lastUpdate}
+            t={t}
+          />
 
-          {/* Enhanced Chart with EV Impact Data */}
-          <Card className="lg:col-span-2 bg-slate-800/90 border-slate-600 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-white text-lg">{t.noiseChart}</CardTitle>
-              <CardDescription className="text-slate-300 text-sm">
-                {t.realTimeData}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={noiseData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                  <XAxis 
-                    dataKey="time" 
-                    stroke="#94A3B8"
-                    fontSize={10}
-                    tickFormatter={(value) => value.split(':').slice(0, 2).join(':')}
-                  />
-                  <YAxis 
-                    stroke="#94A3B8"
-                    fontSize={10}
-                    domain={[30, 75]}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: '#1E293B',
-                      border: '1px solid #475569',
-                      borderRadius: '6px',
-                      color: '#F1F5F9'
-                    }}
-                    labelStyle={{ color: '#F1F5F9' }}
-                    formatter={(value: any, name: string) => [
-                      `${value} dB`,
-                      name === 'noise' ? 'Noise Level' : name
-                    ]}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="noise" 
-                    stroke="#3B82F6" 
-                    strokeWidth={2}
-                    dot={{ fill: '#3B82F6', strokeWidth: 2, r: 2 }}
-                    activeDot={{ r: 4, stroke: '#3B82F6', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <NoiseChart noiseData={noiseData} t={t} />
 
-          {/* Enhanced EV Adoption Rate with Real Data */}
-          <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-white flex items-center gap-2 text-lg">
-                <Car className="text-green-400" size={20} />
-                {t.evAdoption}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-400 mb-2">
-                  {Math.round(evAdoption * 10) / 10}%
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2 mb-3">
-                  <div 
-                    className="bg-gradient-to-r from-green-500 to-green-400 h-2 rounded-full transition-all duration-1000"
-                    style={{ width: `${Math.min(evAdoption * 2.5, 100)}%` }}
-                  ></div>
-                </div>
-                <p className="text-xs text-slate-300 mb-1">
-                  Plateau Montréal
-                </p>
-                <p className="text-xs text-slate-400">
-                  Target 2030: {currentEVData.montreal.target2030}%
-                </p>
-                <p className="text-xs text-green-400 mt-1">
-                  Growth: +{currentEVData.montreal.monthlyGrowth}%/month
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <EVAdoptionDisplay evAdoption={evAdoption} t={t} />
 
           {/* Noise Guide */}
           <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
