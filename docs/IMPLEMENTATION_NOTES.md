@@ -1,13 +1,43 @@
 # Implementation Notes - Lafontaine Park Noise Monitor
 
 > **Author**: GitHub Copilot
-> **Last updated**: May 26, 2025
+> **Last updated**: June 13, 2025 (Analytics Integration)
 
 ## Overview
 
-This document details the implementation improvements made to the Lafontaine Park Noise Monitor application, focusing on data visualization, time-series rendering, and the unification of real and simulated data.
+This document details the implementation improvements made to the Lafontaine Park Noise Monitor application, focusing on data visualization, time-series rendering, unification of real and simulated data, and the addition of privacy-first analytics capabilities.
 
 ## Key Enhancements
+
+### 0. Privacy-First Analytics System (June 2025)
+
+We implemented a comprehensive analytics system that respects user privacy while providing valuable research insights:
+
+- **Consent-Based Tracking** - Analytics only enabled after explicit user consent through existing privacy dialog
+- **Anonymized Data Collection** - No personal information stored, only environmental engagement patterns
+- **Transparency Dashboard** - Users can see exactly what data is being collected in real-time
+- **Quebec Bill 64 Compliance** - Follows provincial privacy regulations for anonymized environmental data
+
+#### Analytics Features:
+```typescript
+// Key tracking capabilities
+analytics.trackEnvironmentalInteraction('noise_level', {
+  current_noise: 45.2,
+  ev_adoption: 8.2, 
+  noise_reduction: 1.15
+});
+
+analytics.trackFeatureUsage('language_switch', 'change', { language: 'fr' });
+analytics.trackEvent('engagement_milestone', { duration_seconds: 120 });
+```
+
+#### Data Insights Available:
+- Session duration and engagement patterns
+- Language preference trends (French vs English)
+- Environmental data interaction behaviors
+- Peak usage times correlated with actual noise patterns
+- Regional engagement through timezone analysis
+- Device accessibility patterns (mobile vs desktop)
 
 ### 1. Unified Data Strategy
 
@@ -123,6 +153,24 @@ useEffect(() => {
     setCurrentNoise(latestNoise.noise);
   }
 }, [consentGiven]);
+```
+
+### 6. Privacy-First Analytics Integration
+
+Integrated analytics with a focus on user privacy:
+
+- **Anonymous Usage Statistics**: Collects basic interaction data without personal identifiers
+- **Performance Monitoring**: Gathers performance metrics to aid in optimization
+- **Opt-out Capability**: Users can easily opt-out of analytics tracking
+
+```typescript
+// Example analytics event tracking
+const trackEvent = (eventName: string, eventData?: object) => {
+  if (analyticsConsentGiven) {
+    // Send event to analytics service
+    sendToAnalyticsService(eventName, eventData);
+  }
+};
 ```
 
 ## Scientific Basis

@@ -15,6 +15,9 @@ import { NoiseDisplay } from '@/components/NoiseDisplay';
 import { NoiseChart } from '@/components/NoiseChart';
 import { EVAdoptionDisplay } from '@/components/EVAdoptionDisplay';
 import { ConsentDialog } from '@/components/ConsentDialog';
+import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
+import { analytics } from '@/lib/analytics';
+import { useScrollTracking } from '@/hooks/useAnalytics';
 
 // EV adoption data for Montreal/Quebec/Canada (realistic estimates)
 const evAdoptionData = {
@@ -58,7 +61,11 @@ const translations = {
     poweredBy: "Powered by",
     contact: "Contact us at",
     evImpact: "EV Noise Reduction",
-    realTimeData: "Real-time correlation with EV adoption data"
+    realTimeData: "Real-time correlation with EV adoption data",
+    analyticsTitle: "Privacy Analytics",
+    analyticsDescription: "All data is anonymized and used only for environmental research. No personal information is stored.",
+    showData: "Show",
+    hideData: "Hide"
   },
   fr: {
     title: "Moniteur de Bruit Parc Lafontaine",
@@ -94,7 +101,11 @@ const translations = {
     poweredBy: "Propulsé par",
     contact: "Contactez-nous à",
     evImpact: "Réduction de Bruit VÉ",
-    realTimeData: "Corrélation en temps réel avec les données d'adoption VÉ"
+    realTimeData: "Corrélation en temps réel avec les données d'adoption VÉ",
+    analyticsTitle: "Analyse de la Confidentialité",
+    analyticsDescription: "Toutes les données sont anonymisées et utilisées uniquement à des fins de recherche environnementale. Aucune information personnelle n'est stockée.",
+    showData: "Afficher",
+    hideData: "Masquer"
   }
 };
 
@@ -109,6 +120,49 @@ const Index = () => {
   const [noiseData, setNoiseData] = useState<NoiseDataPoint[]>([]);
 
   const t = translations[language];
+  
+  // Track different sections of the app
+  const chartSectionRef = useScrollTracking({ 
+    enabled: consentGiven, 
+    sectionName: 'noise_chart' 
+  });
+  const evSectionRef = useScrollTracking({ 
+    enabled: consentGiven, 
+    sectionName: 'ev_adoption' 
+  });
+  const guideSectionRef = useScrollTracking({ 
+    enabled: consentGiven, 
+    sectionName: 'noise_guide' 
+  });
+  
+  // Track user engagement with environmental data
+  useEffect(() => {
+    if (consentGiven) {
+      analytics.trackEnvironmentalInteraction('noise_level', {
+        current_noise: currentNoise,
+        noise_reduction: noiseReduction,
+        ev_adoption: evAdoption
+      });
+    }
+  }, [currentNoise, consentGiven]); // Track when noise levels change significantly
+
+  // Track user session duration milestones
+  useEffect(() => {
+    if (!consentGiven) return;
+    
+    const milestones = [30, 60, 120, 300]; // 30s, 1m, 2m, 5m
+    const timers = milestones.map(seconds => 
+      setTimeout(() => {
+        analytics.trackEvent('engagement_milestone', { 
+          duration_seconds: seconds,
+          language 
+        });
+      }, seconds * 1000)
+    );
+
+    return () => timers.forEach(timer => clearTimeout(timer));
+  }, [consentGiven, language]);
+
   // Initialize time series data once when component mounts
   useEffect(() => {
     if (consentGiven) {
@@ -166,9 +220,13 @@ const Index = () => {
     if (accepted) {
       setConsentGiven(true);
       setShowConsent(false);
+      // Enable analytics after consent
+      analytics.enableAnalytics();
+      analytics.trackPageView('noise_monitor_main');
       // TODO: Store consent in Supabase when integration is enabled
       console.log('User consent stored - ready for Supabase integration');
     } else {
+      analytics.trackEvent('consent_declined');
       window.close();
     }
   };
@@ -209,10 +267,13 @@ const Index = () => {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-slate-400">{t.language}:</span>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm ${language === 'en' ? 'text-white' : 'text-slate-500'}`}>EN</span>
-                  <Switch 
+                  <span className={`text-sm ${language === 'en' ? 'text-white' : 'text-slate-500'}`}>EN</span>                  <Switch 
                     checked={language === 'fr'} 
-                    onCheckedChange={(checked) => setLanguage(checked ? 'fr' : 'en')}
+                    onCheckedChange={(checked) => {
+                      const newLang = checked ? 'fr' : 'en';
+                      setLanguage(newLang);
+                      analytics.trackFeatureUsage('language_switch', 'change', { language: newLang });
+                    }}
                   />
                   <span className={`text-sm ${language === 'fr' ? 'text-white' : 'text-slate-500'}`}>FR</span>
                 </div>
@@ -227,12 +288,16 @@ const Index = () => {
               t={t}
             />
 
-            <NoiseChart noiseData={noiseData} t={t} />
+            <div ref={chartSectionRef as any}>
+              <NoiseChart noiseData={noiseData} t={t} />
+            </div>
 
-            <EVAdoptionDisplay evAdoption={evAdoption} t={t} />
+            <div ref={evSectionRef as any}>
+              <EVAdoptionDisplay evAdoption={evAdoption} t={t} />
+            </div>
 
             {/* Noise Guide */}
-            <Card className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
+            <Card ref={guideSectionRef as any} className="bg-slate-800/90 border-slate-600 backdrop-blur-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white flex items-center gap-2 text-lg">
                   <Leaf className="text-green-400" size={20} />
@@ -306,9 +371,11 @@ const Index = () => {
                       {t.peakHours}
                     </Badge>
                   </div>
-                </div>
-              </CardContent>
+                </div>              </CardContent>
             </Card>
+            
+            {/* Analytics Dashboard - Show transparency about data collection */}
+            <AnalyticsDashboard enabled={consentGiven} t={t} />
           </div>
         </div>
       </div>
