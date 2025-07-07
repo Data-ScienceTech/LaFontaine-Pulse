@@ -44,6 +44,9 @@ Once you've configured GitHub Pages in settings:
 After proper configuration, your app will be live at:
 **https://data-sciencetech.github.io/LaFontaine-Pulse/**
 
+### Asset Loading Issue Fix
+If you see 404 errors for CSS/JS files, this means GitHub Pages is serving an old build. The latest deployment should fix asset file name mismatches.
+
 ## ⚠️ Common Issues
 
 - **Private Repository**: GitHub Pages requires public repos on free plan
