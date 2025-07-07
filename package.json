@@ -10,7 +10,7 @@
   "build:gh-pages": "cross-env NODE_ENV=production vite build",
   "lint": "eslint .",
   "preview": "vite preview",
-  "preview:gh-pages": "vite preview --base=/papineau-noise-pulse/",
+  "preview:gh-pages": "vite preview --base=/LaFontaine-Pulse/",
   "cleanup-branding": "node scripts/cleanup-branding.mjs",
  "pre-deploy": "npm run cleanup-branding && npm run build:gh-pages",
  "setup-github-pages": "bash scripts/setup-github-pages.sh",

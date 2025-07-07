@@ -5,7 +5,7 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   // Set base URL for GitHub Pages deployment
-  base: process.env.NODE_ENV === 'production' ? '/papineau-noise-pulse/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/LaFontaine-Pulse/' : '/',
   server: {
     host: "::",
     port: 8080,

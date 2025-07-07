@@ -10,17 +10,17 @@
 ## 📋 Manual Steps Required
 
 ### 1. Enable GitHub Pages (if not already done)
-1. Go to https://github.com/carlosdenner/papineau-noise-pulse/settings/pages
+1. Go to https://github.com/data-sciencetech/LaFontaine-Pulse/settings/pages
 2. Under "Source", select "GitHub Actions"
 3. Save the settings
 
 ### 2. Monitor Deployment
-1. Check the GitHub Actions tab: https://github.com/carlosdenner/papineau-noise-pulse/actions
+1. Check the GitHub Actions tab: https://github.com/data-sciencetech/LaFontaine-Pulse/actions
 2. Look for the "Deploy to GitHub Pages" workflow
 3. Ensure it completes successfully
 
 ### 3. Verify Live Site
-Once deployment is complete, visit: https://carlosdenner.github.io/papineau-noise-pulse/
+Once deployment is complete, visit: https://data-sciencetech.github.io/LaFontaine-Pulse/
 
 ## 🔍 Troubleshooting
 
@@ -46,7 +46,7 @@ The app includes privacy-compliant analytics:
 ## 🚀 Expected Result
 
 The LaFontaine Noise Pulse web app should be live at:
-**https://carlosdenner.github.io/papineau-noise-pulse/**
+**https://data-sciencetech.github.io/LaFontaine-Pulse/**
 
 The site will show:
 - Real-time noise level monitoring

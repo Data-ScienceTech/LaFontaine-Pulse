@@ -1,8 +1,8 @@
 # 🚀 GitHub Pages Deployment Status
 
 ## Repository Information
-- **GitHub Repository**: `https://github.com/carlosdenner/papineau-noise-pulse`
-- **Target URL**: `https://carlosdenner.github.io/papineau-noise-pulse/`
+- **GitHub Repository**: `https://github.com/data-sciencetech/LaFontaine-Pulse`
+- **Target URL**: `https://data-sciencetech.github.io/LaFontaine-Pulse/`
 - **Status**: Ready for deployment with fixes applied
 
 ## ✅ Current Configuration
@@ -22,7 +22,7 @@
 ## 🎯 Next Steps for Deployment
 
 ### **1. Check GitHub Pages Settings**
-Go to: `https://github.com/carlosdenner/papineau-noise-pulse/settings/pages`
+Go to: `https://github.com/data-sciencetech/LaFontaine-Pulse/settings/pages`
 
 **Required Settings:**
 - **Source**: GitHub Actions (not Deploy from a branch)
@@ -42,13 +42,13 @@ git push origin main
 ```
 
 ### **3. Monitor Deployment**
-- Check Actions tab: `https://github.com/carlosdenner/papineau-noise-pulse/actions`
+- Check Actions tab: `https://github.com/data-sciencetech/LaFontaine-Pulse/actions`
 - Look for "Deploy to GitHub Pages" workflow
 - Should complete in ~2-3 minutes
 
 ### **4. Access Your Live App**
 Once deployed, your LaFontaine Noise Pulse app will be available at:
-**`https://carlosdenner.github.io/papineau-noise-pulse/`**
+**`https://data-sciencetech.github.io/LaFontaine-Pulse/`**
 
 ## 🔧 Troubleshooting
 
