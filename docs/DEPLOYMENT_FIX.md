@@ -60,7 +60,7 @@ git commit -m "🔧 Fix rollup native binary issue for GitHub Pages deployment"
 git push origin main
 ```
 
-Your app will be live at: **`https://data-sciencetech.github.io/papineau-noise-pulse/`**
+Your app will be live at: **`https://carlosdenner.github.io/papineau-noise-pulse/`**
 
 ## 🛠️ **Technical Details:**
 

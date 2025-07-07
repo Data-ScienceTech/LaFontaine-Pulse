@@ -2,13 +2,12 @@
 
 ## 🚀 Deploying LaFontaine Noise Pulse to GitHub Pages
 
-This guide will help you deploy your noise monitoring application to GitHub Pages under your data-sciencetech organization.
+This guide will help you deploy your noise monitoring application to GitHub Pages under your personal GitHub account.
 
 ### Prerequisites
 
 1. **GitHub Repository Setup**
-   - Repository should be under the `data-sciencetech` organization
-   - Repository name: `papineau-noise-pulse`
+   - Repository: `https://github.com/carlosdenner/papineau-noise-pulse`
    - Repository should be public (required for GitHub Pages on free plans)
 
 ### Step-by-Step Deployment
@@ -21,20 +20,20 @@ git add .
 git commit -m "Initial commit - LaFontaine Noise Pulse app"
 
 # Add your GitHub repository as origin
-git remote add origin https://github.com/data-sciencetech/papineau-noise-pulse.git
+git remote add origin https://github.com/carlosdenner/papineau-noise-pulse.git
 git branch -M main
 git push -u origin main
 ```
 
 #### 2. **Enable GitHub Pages**
-1. Go to your repository: `https://github.com/data-sciencetech/papineau-noise-pulse`
+1. Go to your repository: `https://github.com/carlosdenner/papineau-noise-pulse`
 2. Click on **Settings** tab
 3. Scroll down to **Pages** section in the left sidebar
 4. Under **Source**, select **GitHub Actions**
 5. The workflow will automatically deploy when you push to main
 
 #### 3. **Verify Deployment**
-- Your app will be available at: `https://data-sciencetech.github.io/papineau-noise-pulse/`
+- Your app will be available at: `https://carlosdenner.github.io/papineau-noise-pulse/`
 - First deployment may take 2-3 minutes
 - Check the **Actions** tab to monitor deployment progress
 
@@ -92,7 +91,7 @@ To use a custom domain:
 your-domain.com
 ```
 
-2. Configure DNS to point to `data-sciencetech.github.io`
+2. Configure DNS to point to `carlosdenner.github.io`
 
 ### 🐛 Troubleshooting
 
@@ -126,4 +125,4 @@ For deployment issues:
 
 ---
 
-**Your app will be live at**: `https://data-sciencetech.github.io/papineau-noise-pulse/`
+**Your app will be live at**: `https://carlosdenner.github.io/papineau-noise-pulse/`

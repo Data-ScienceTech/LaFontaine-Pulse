@@ -4,7 +4,7 @@ A real-time environmental noise monitoring application for Lafontaine Park in Mo
 
 ## 🌟 Live Demo
 
-**Deployed App**: `https://data-sciencetech.github.io/papineau-noise-pulse/`
+**Deployed App**: `https://carlosdenner.github.io/papineau-noise-pulse/`
 
 ## 🚀 Quick Start
 
@@ -57,7 +57,7 @@ Follow these steps:
 
 ```sh
 # Step 1: Clone the repository
-git clone https://github.com/data-sciencetech/papineau-noise-pulse.git
+git clone https://github.com/carlosdenner/papineau-noise-pulse.git
 
 # Step 2: Navigate to the project directory
 cd papineau-noise-pulse
@@ -116,7 +116,7 @@ npm run analytics:azure   # Use Azure storage
 ## 🌍 Deployment
 
 ### GitHub Pages (Current)
-- **URL**: `https://data-sciencetech.github.io/papineau-noise-pulse/`
+- **URL**: `https://carlosdenner.github.io/papineau-noise-pulse/`
 - **Automatic deployment** via GitHub Actions
 - **Perfect for**: Public demonstrations, testing
 
@@ -136,7 +136,7 @@ See [GitHub Pages Deployment Guide](./docs/GITHUB_PAGES_DEPLOYMENT.md) for detai
 
 ## 🤝 Contributing
 
-This project is part of the data-sciencetech organization's environmental monitoring initiative.
+This project is part of Carlos Denner's environmental monitoring initiative for Montreal.
 
 ## 📧 Contact
 
