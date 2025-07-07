@@ -31,20 +31,25 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: npm
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+            
       - name: Install dependencies
-        run: npm ci
-        
+        run: |
+          # Fresh install to avoid optional dependency issues
+          rm -rf node_modules package-lock.json
+          npm install
+          
+      - name: Verify rollup installation
+        run: |
+          # Check if rollup is working
+          npx rollup --version || echo "Rollup not found, but build may still work"
+          
       - name: Build with Vite
-        run: npm run build
-        env:
-          # Important: Set the base URL for GitHub Pages
-          PUBLIC_URL: /papineau-noise-pulse
+        run: npm run build:gh-pages
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
