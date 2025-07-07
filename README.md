@@ -1,10 +1,43 @@
-# Welcome to your project
+# LaFontaine Noise Pulse 🎵🌿
 
-## Project info
+A real-time environmental noise monitoring application for Lafontaine Park in Montreal, tracking the positive impact of electric vehicle adoption on urban noise pollution.
 
-**URL**: https://.dev/projects/728dbb75-a49c-4767-a13f-cb670f9380ce
+## 🌟 Live Demo
 
-## How can I edit this code?
+**Deployed App**: `https://data-sciencetech.github.io/papineau-noise-pulse/`
+
+## 🚀 Quick Start
+
+### Local Development
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Open http://localhost:8080
+```
+
+### GitHub Pages Deployment
+```bash
+# Build for production
+npm run build:gh-pages
+
+# Deploy (automatic via GitHub Actions)
+git push origin main
+```
+
+## 📊 Features
+
+- **Real-time Noise Monitoring**: Live sound level tracking at Papineau & Cartier intersection
+- **EV Impact Analysis**: Correlates electric vehicle adoption with noise reduction
+- **Privacy-Compliant Analytics**: Anonymized data collection respecting Quebec's Bill 64
+- **Bilingual Support**: English and French interfaces
+- **Responsive Design**: Works on mobile, tablet, and desktop
+- **Environmental Focus**: Tracks positive environmental impact in Montreal's Plateau
+
+## 🛠️ How can I edit this code?
 
 There are several ways of editing your application.
 
@@ -16,27 +49,102 @@ Changes made via will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in .
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 Follow these steps:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Step 1: Clone the repository
+git clone https://github.com/data-sciencetech/papineau-noise-pulse.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd papineau-noise-pulse
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install the necessary dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🏗️ Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── ui/             # UI components (shadcn/ui)
+│   ├── ConsentDialog.tsx
+│   ├── NoiseChart.tsx
+│   └── NoiseDisplay.tsx
+├── hooks/              # Custom React hooks
+├── lib/                # Utilities and services
+│   ├── analytics.ts    # Privacy-compliant analytics
+│   └── storage/        # Storage adapters
+├── data/               # Data models and adapters
+└── pages/              # Page components
+```
+
+## 📈 Analytics & Privacy
+
+This application implements privacy-first analytics:
+
+- **Local Storage**: Data stays on user's device
+- **Anonymized Data**: No personal information collected
+- **Quebec Bill 64 Compliant**: Respects privacy regulations
+- **Optional Azure Integration**: For advanced analytics
+
+## 🔧 Available Scripts
+
+```bash
+# Development
+npm run dev                 # Start development server
+npm run build              # Build for production
+npm run build:gh-pages     # Build for GitHub Pages
+npm run preview           # Preview production build
+
+# Deployment
+npm run pre-deploy        # Clean + build for deployment
+npm run setup-azure       # Setup Azure analytics (optional)
+
+# Analytics
+npm run analytics:local   # Use local storage
+npm run analytics:azure   # Use Azure storage
+```
+
+## 🌍 Deployment
+
+### GitHub Pages (Current)
+- **URL**: `https://data-sciencetech.github.io/papineau-noise-pulse/`
+- **Automatic deployment** via GitHub Actions
+- **Perfect for**: Public demonstrations, testing
+
+### Azure (Optional)
+- Enhanced analytics capabilities
+- Custom domain support
+- Advanced monitoring
+
+See [GitHub Pages Deployment Guide](./docs/GITHUB_PAGES_DEPLOYMENT.md) for detailed instructions.
+
+## 📊 Data Sources
+
+- **EV Adoption**: Montreal/Quebec/Canada statistics
+- **Noise Modeling**: DRSP noise maps validation
+- **Traffic Patterns**: Papineau & Cartier intersection data
+- **Environmental Impact**: Real-time correlation analysis
+
+## 🤝 Contributing
+
+This project is part of the data-sciencetech organization's environmental monitoring initiative.
+
+## 📧 Contact
+
+For questions about this project, contact the data-sciencetech team.
+
+---
+
+**Made with ❤️ for Montreal's environmental future**
 
 - Navigate to the desired file(s).
 - Click the "Edit" button (pencil icon) at the top right of the file view.

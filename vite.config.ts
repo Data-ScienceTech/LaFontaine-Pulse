@@ -4,6 +4,8 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Set base URL for GitHub Pages deployment
+  base: process.env.NODE_ENV === 'production' ? '/papineau-noise-pulse/' : '/',
   server: {
     host: "::",
     port: 8080,
@@ -15,5 +17,18 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  // Optimize bundle size for GitHub Pages
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          charts: ['recharts'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-switch', '@radix-ui/react-toast'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 800, // Increase limit for data visualization apps
   },
 }));
