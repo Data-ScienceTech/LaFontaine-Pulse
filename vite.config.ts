@@ -4,8 +4,9 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Set base URL for GitHub Pages deployment
-  base: process.env.NODE_ENV === 'production' ? '/LaFontaine-Pulse/' : '/',
+  // Use custom domain base path if CNAME file exists, otherwise GitHub Pages subdirectory
+  base: process.env.CUSTOM_DOMAIN === 'true' ? '/' : 
+        (process.env.NODE_ENV === 'production' ? '/LaFontaine-Pulse/' : '/'),
   server: {
     host: "::",
     port: 8080,
