@@ -17,6 +17,7 @@ import { EVAdoptionDisplay } from '@/components/EVAdoptionDisplay';
 import { ConsentDialog } from '@/components/ConsentDialog';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { analytics } from '@/lib/analytics';
+import { realAnalytics } from '@/lib/realAnalytics';
 import { useScrollTracking } from '@/hooks/useAnalytics';
 
 // EV adoption data for Montreal/Quebec/Canada (realistic estimates)
@@ -143,8 +144,16 @@ const Index = () => {
         noise_reduction: noiseReduction,
         ev_adoption: evAdoption
       });
+      
+      // Track real analytics
+      realAnalytics.trackInteraction('noise_level_view', 'current_noise', currentNoise);
     }
   }, [currentNoise, consentGiven]); // Track when noise levels change significantly
+
+  // Track page view on initial load
+  useEffect(() => {
+    realAnalytics.trackPageView('/');
+  }, []);
 
   // Track user session duration milestones
   useEffect(() => {
@@ -157,6 +166,7 @@ const Index = () => {
           duration_seconds: seconds,
           language 
         });
+        realAnalytics.trackTimeSpent('main_page', seconds * 1000);
       }, seconds * 1000)
     );
 
@@ -273,6 +283,7 @@ const Index = () => {
                       const newLang = checked ? 'fr' : 'en';
                       setLanguage(newLang);
                       analytics.trackFeatureUsage('language_switch', 'change', { language: newLang });
+                      realAnalytics.trackLanguageSwitch(newLang);
                     }}
                   />
                   <span className={`text-sm ${language === 'fr' ? 'text-white' : 'text-slate-500'}`}>FR</span>

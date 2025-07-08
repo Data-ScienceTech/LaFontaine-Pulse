@@ -1,0 +1,22 @@
+# Azure Developer CLI configuration for LaFontaine Noise Pulse Analytics Backend
+name: lafontaine-analytics
+metadata:
+  template: lafontaine-analytics@0.0.1-beta
+
+services:
+  analytics-api:
+    project: ./api
+    language: js
+    host: containerapp
+
+hooks:
+  postprovision:
+    shell: pwsh
+    run: |
+      Write-Host "🎉 Analytics backend provisioned successfully!" -ForegroundColor Green
+      Write-Host ""
+      Write-Host "📝 Next steps:" -ForegroundColor Yellow
+      Write-Host "   1. Note the ANALYTICS_API_URI from the deployment output"
+      Write-Host "   2. Update src/lib/globalAnalytics.ts with the real API URL"
+      Write-Host "   3. Redeploy your frontend to GitHub Pages"
+      Write-Host ""
